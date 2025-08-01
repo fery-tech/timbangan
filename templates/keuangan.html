@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rekap Keuangan</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background: #f6f6f6;
+  }
+
+  h1 {
+    margin-top: 0;
+    text-align: center;
+  }
+
+  form {
+    margin-bottom: 20px;
+    background: #ffffff;
+    padding: 15px;
+    border: 1px solid #ccc;
+  }
+
+  label {
+    margin-right: 20px;
+  }
+
+  input,
+  select,
+  button {
+    padding: 5px;
+    margin-left: 5px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    margin-top: 20px;
+  }
+
+  th,
+  td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+  }
+
+  th {
+    background-color: #4caf50;
+    color: white;
+  }
+
+  .summary {
+    margin-top: 20px;
+    background: #ffffff;
+    padding: 15px;
+    border: 1px solid #ccc;
+  }
+
+  .summary h3 {
+    margin-top: 0;
+  }
+
+  strong {
+    color: #333;
+  }
+
+  /* Tombol Umum */
+  button,
+  a {
+    text-decoration: none;
+    background-color: #4caf50;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  button:hover,
+  a:hover {
+    background-color: #45a049;
+  }
+
+  /* Tombol di dalam summary */
+  .summary button:hover {
+    background-color: #388e3c;
+  }
+
+  /* Tombol Pagination */
+  #pagination {
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  #pagination button {
+    margin: 2px;
+  }
+
+  #pagination button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+
+  #pagination button.active {
+    background-color: #2e7d32;
+    font-weight: bold;
+  }
+</style>
+
+  <script>
+    const rowsPerPage = 10;
+    let currentPage = 1;
+
+    function displayTablePage(page) {
+      const table = document.getElementById("rekapTable");
+      const tbody = table.getElementsByTagName("tbody")[0];
+      const rows = tbody.getElementsByTagName("tr");
+      const totalRows = rows.length;
+      const totalPages = Math.ceil(totalRows / rowsPerPage);
+      currentPage = page;
+
+      for (let i = 0; i < totalRows; i++) {
+        rows[i].style.display =
+          i >= (page - 1) * rowsPerPage && i < page * rowsPerPage ? "" : "none";
+        rows[i].cells[0].innerText = i + 1;
+      }
+
+      const pagination = document.getElementById("pagination");
+      pagination.innerHTML = "";
+
+      if (page > 1) {
+        pagination.innerHTML += `<button onclick="displayTablePage(${page - 1})">⭠</button>`;
+      }
+
+      for (let i = 1; i <= totalPages; i++) {
+        pagination.innerHTML += `<button onclick="displayTablePage(${i})" class="${i === page ? 'active' : ''}">${i}</button>`;
+      }
+
+      if (page < totalPages) {
+        pagination.innerHTML += `<button onclick="displayTablePage(${page + 1})">⭢</button>`;
+      }
+    }
+
+    window.onload = function () {
+      displayTablePage(1);
+    };
+  </script>
+</head>
+<body>
+  <h1>Rekap Keuangan</h1>
+
+  <form method="get">
+    <label>Dari:
+      <input type="date" name="start" value="{{ start or now }}">
+    </label>
+    <label>Sampai:
+      <input type="date" name="end" value="{{ end or now }}">
+    </label>
+
+    <label>Petani:
+      <select name="petani">
+        <option value="">Semua</option>
+        {% for p in daftar_petani %}
+          <option value="{{ p }}" {% if petani == p %}selected{% endif %}>{{ p }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>Sayur:
+      <select name="sayur">
+        <option value="">Semua</option>
+        {% for s in daftar_sayur %}
+          <option value="{{ s }}" {% if sayur == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>Grade:
+      <select name="grade">
+        <option value="">Semua</option>
+        {% for g in daftar_grade %}
+          <option value="{{ g }}" {% if grade == g %}selected{% endif %}>{{ g }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <button type="submit">Tampilkan</button>
+  </form>
+
+  <div class="summary">
+    <h3>Summary</h3>
+    <p>Total Modal Belanja : <strong>Rp {{ '{:,.0f}'.format(total_uang_keluar) }}</strong></p>
+    <p>Estimasi Pendapatan : <strong>Rp {{ '{:,.0f}'.format(total_pendapatan) }}</strong></p>
+    <p>Estimasi Keuntungan : <strong>Rp {{ '{:,.0f}'.format(total_keuntungan) }}</strong></p>
+    <button><a href="/nota">Lihat Nota</a></button>
+  </div>
+
+  <div id="pagination"></div>
+
+  <table id="rekapTable">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Tanggal</th>
+        <th>Petani</th>
+        <th>Sayur</th>
+        <th>Grade</th>
+        <th>Berat (kg)</th>
+        <th>Harga Beli/kg</th>
+        <th>Harga Jual/kg</th>
+        <th>Modal Belanja</th>
+        <th>Pendapatan</th>
+        <th>Keuntungan</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      {% for row in hasil %}
+      <tr>
+        <td></td>
+        <td>{{ row.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td>{{ row.petani }}</td>
+        <td>{{ row.sayur }}</td>
+        <td>{{ row.grade }}</td>
+        <td>{{ "{:,.2f}".format(row.weight).replace(",", "X").replace(".", ",").replace("X", ".") }}</td>
+        <td>Rp {{ '{:,.0f}'.format(row.harga_per_kg or 0) }}</td>
+        <td>Rp {{ '{:,.0f}'.format(row.harga_jual or 0) }}</td>
+        <td>Rp {{ '{:,.0f}'.format(row.uang_keluar or 0) }}</td>
+        <td>Rp {{ '{:,.0f}'.format(row.pendapatan or 0) }}</td>
+        <td>Rp {{ '{:,.0f}'.format(row.keuntungan or 0) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div id="pagination"></div>
+  <center><button><a href="/">Dashboard</a></button></center>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Dashboard Timbangan</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ url_for('static', filename='chart.js') }}"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Dashboard Timbangan IoT</h1>
+      <div class="filter-container">
+        <label for="startDate">Dari:</label>
+        <input type="date" id="startDate" />
+        <label for="endDate">Sampai:</label>
+        <input type="date" id="endDate" />
+        <button id="filterButton">Terapkan</button>
+      </div>
+      <h2>Tren</h2>
+      <canvas id="grafikTren" width="600" height="300"></canvas>
+      <h2>Hasil Panen</h2>
+      <canvas id="grafikBerat" width="600" height="400"></canvas>
+      <h2>Summary</h2>
+      <div class="petani-summary-container" id="petaniSummaryContainer"></div>
+      <center><a href="/keuangan" class="btn btn-primary mt-4">Lihat Data Transaksi</a></center>
+      <center><a href="/manage" class="btn btn-primary mt-4">Manajemen Sayur</a></center>
+    </div>
+  </body>
+</html>
